@@ -5,9 +5,11 @@ const path = require("path");
 const multer = require("multer");
 const fs = require("fs");
 const cors = require("cors");
+const bcrypt = require("bcryptjs");
+const userModel = require("./models/userModel");
 
 app.use(cors());
-
+app.use(express.json()); 
 const createUploadDirectory = (dir) => {
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
@@ -48,6 +50,37 @@ const upload = multer({
   },
 });
 
+app.get("/register", (req, res) => {
+  res.sendFile(path.join(__dirname, "frontend.html"));
+});
+
+app.post("/register", async (req, res) => {
+  const { username, email, password } = req.body;
+
+  if (!username || !email || !password) {
+    return res.status(400).json({ message: "Todos os campos são obrigatórios." });
+  }
+
+  const existingUser = userModel.findByUsername(username);
+  if (existingUser) {
+    return res.status(400).json({ message: "Usuário já existe." });
+  }
+
+  try {
+    const passwordHash = await bcrypt.hash(password, 10);
+    const newUser = {
+      id: Date.now().toString(),
+      username,
+      email,
+      passwordHash
+    };
+    userModel.addUser(newUser);
+    res.status(201).json({ message: "Usuário cadastrado com sucesso!" });
+  } catch (error) {
+    res.status(500).json({ message: "Erro interno do servidor." });
+  }
+});
+
 app.post("/upload", (req, res) => {
   upload.array("meusArquivos", 10)(req, res, function (err) {
     if (err instanceof multer.MulterError) {
@@ -81,6 +114,11 @@ app.post("/upload", (req, res) => {
 
 app.get("/", (req, res) => {
   res.send("Servidor de upload funcionando");
+});
+
+app.get("/users", (req, res) => {
+  const allUsers = userModel.getAllUsers();
+  res.json(allUsers);
 });
 
 app.listen(port, () => {
