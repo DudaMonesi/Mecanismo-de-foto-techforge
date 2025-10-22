@@ -1,0 +1,23 @@
+{
+  "name": "file-upload-app",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "upload",
+    "files",
+    "express"
+  ],
+  "author": "Gabriel",
+  "license": "ISC",
+  "description": "Aplicação simples para upload de arquivos de imagem",
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "multer": "^2.0.2"
+  }
+}
